@@ -1,0 +1,27 @@
+name: Check for File Changes and Send Email
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  check_file_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 4
+          
+      - name: Output tag name
+        run: |
+          echo "::set-output name=tag_name::${GITHUB_REF#refs/tags/}"
+
+
+      - name: Post to webhook
+        run: |
+          npm install
+          node index.js
+        env:
+          WEBHOOK_URL: ${{'https://prod-188.westus.logic.azure.com:443/workflows/a0230fdd6dcb4fcf938235b08575f906/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UjoaaHQUIZedJvDgXhxMZ1qI0UlLIOGzTO8YPIcCJ2w'}}
+          TAG_NAME: ${{ steps.output_tag_name.outputs.tag_name }}
